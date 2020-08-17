@@ -1,0 +1,7 @@
+Notes on authentication:
+Nothing is stored in the databasee that states whether a person is authenticated.
+Once a user is logge in the server generates a token. Store it on the device.
+We send this token with a request such that the API is protected. Only if yyouu have a valid token
+will the server allow yyou to send a request.
+
+We will implement this in this module. Nodejs the complete guide source is a good start point.
