@@ -64,8 +64,8 @@ flutter:
   fonts:
     - family: OleoScript
       fonts:
-        - asset: fonts/OleoScript-Bold.ttf
-        - asset: fonts/OleoScript-Regular.ttf
+        - asset: ./assets/fonts/OleoScript-Bold.ttf
+        - asset: ./assets/fonts/OleoScript-Regular.ttf
   
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
