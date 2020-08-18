@@ -4,24 +4,21 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 class Auth {
-  String _toke;
+  String _token;
   String _expire;
   String _uid;
 
-  Future<void> signup(String email, String password) async {
+  static Future<void> signup(String email, String password) async {
     const url =
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API_KEY]";
-    http
-        .post(url,
-            body: json.encode(
-              {
-                'email': email,
-                'password': password,
-                'returnSecureToken': true,
-              },
-            ))
-        .then((response) {
-      print(response);
-    });
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${AuthAPI}";
+    final response = await http.post(url,
+        body: json.encode(
+          {
+            'email': email,
+            'password': password,
+            'returnSecureToken': true,
+          },
+        ));
+    print(json.decode(response.body));
   }
 }
