@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:Musicode/models/auth.dart';
+import 'package:provider/provider.dart';
+import 'package:Musicode/providers/auth_provider.dart';
+import 'package:Musicode/models/http_exception.dart';
 
 enum AuthMode { Login, Signup }
 
@@ -10,15 +12,33 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   AuthMode _authMode = AuthMode.Login;
-  var _valid = false;
+  bool _isLoading = false;
 
   Map<String, String> _authData = {
     'email': '',
     'password': '',
   };
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  void _showErrorDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: Text("An Error Occured!"),
+              content: Text(message),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Okay"),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                ),
+              ],
+            ));
+  }
 
   void _switchAuthMode() {
     if (_authMode == AuthMode.Login) {
@@ -28,6 +48,7 @@ class _AuthScreenState extends State<AuthScreen> {
     } else {
       setState(() {
         _authMode = AuthMode.Login;
+        _confirmPasswordController.clear();
       });
     }
   }
@@ -47,14 +68,14 @@ class _AuthScreenState extends State<AuthScreen> {
 
   bool _passwordValidator(String password, [String confirmPassword]) {
     if (confirmPassword == null) {
-      if (password.isEmpty || password.length < 5) {
+      if (password.isEmpty || password.length < 6) {
         print("The password is to short!");
         return false;
       }
 
       _authData["password"] = password;
       return true;
-    } else if (confirmPassword != null) {
+    } else if (confirmPassword != null && confirmPassword.isNotEmpty) {
       if (password.isEmpty || password.length < 5) {
         print("The password is to short!");
         return false;
@@ -62,10 +83,51 @@ class _AuthScreenState extends State<AuthScreen> {
         print("Passwords do not match!");
         return false;
       }
-
-      _authData["password"] = password;
-      return true;
     }
+    _authData["password"] = password;
+    return true;
+  }
+
+  Future<void> _submit() async {
+    bool pass = _passwordValidator(
+        _passwordController.text, _confirmPasswordController.text);
+
+    bool email = _emailValidator(_emailController.text);
+
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      if (pass && email) {
+        (_authMode == AuthMode.Login)
+            ? await Provider.of<Auth>(context, listen: false)
+                .login(_authData["email"], _authData["password"])
+            : await Provider.of<Auth>(context, listen: false)
+                .signup(_authData["email"], _authData["password"]);
+      }
+    } on HttpException catch (error) {
+      var errorMessage = 'Authentication failed';
+      if (error.toString().contains('EMAIL_EXISTS')) {
+        errorMessage = 'This email address is already in use.';
+      } else if (error.toString().contains('INVALID_EMAIL')) {
+        errorMessage = 'This is not a valid email address';
+      } else if (error.toString().contains('WEAK_PASSWORD')) {
+        errorMessage = 'This password is too weak.';
+      } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMessage = 'Could not find a user with that email.';
+      } else if (error.toString().contains('INVALID_PASSWORD')) {
+        errorMessage = 'Invalid password.';
+      }
+      print("do we even make it this far");
+      _showErrorDialog(errorMessage);
+    } catch (error) {
+      const errorMessage =
+          'Could not authenticate you. Please try again later.';
+      _showErrorDialog(errorMessage);
+    }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -157,38 +219,29 @@ class _AuthScreenState extends State<AuthScreen> {
                           if (_authMode == AuthMode.Signup)
                             SizedBox(height: 10),
                           // Login and Signup Button
-                          Container(
-                              width: double.infinity,
-                              child: RaisedButton(
-                                color: Colors.lightBlue,
-                                elevation: 5.0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18.0),
-                                ),
-                                onPressed: () {
-                                  bool pass = _passwordValidator(
-                                      _passwordController.text,
-                                      _confirmPasswordController.text);
-
-                                  bool email =
-                                      _emailValidator(_emailController.text);
-
-                                  if (pass && email) {
-                                    (_authMode == AuthMode.Signup)
-                                        ? Auth.signup(_authData["email"],
-                                            _authData["password"])
-                                        : null;
-                                  }
-                                },
-                                child: Text(
-                                  _authMode == AuthMode.Login
-                                      ? "Login"
-                                      : "Signup",
-                                  style: TextStyle(
-                                    color: Colors.white,
+                          if (_isLoading)
+                            CircularProgressIndicator()
+                          else
+                            Container(
+                                width: double.infinity,
+                                child: RaisedButton(
+                                  color: Colors.lightBlue,
+                                  elevation: 5.0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18.0),
                                   ),
-                                ),
-                              )),
+                                  onPressed: () {
+                                    _submit();
+                                  },
+                                  child: Text(
+                                    _authMode == AuthMode.Login
+                                        ? "Login"
+                                        : "Signup",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )),
                           SizedBox(height: 5),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

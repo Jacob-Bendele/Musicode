@@ -9,6 +9,9 @@
 .history
 .svn/
 
+#API Keys
+*.secrets
+
 # IntelliJ related
 *.iml
 *.ipr
