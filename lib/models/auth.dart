@@ -10,11 +10,7 @@ class Auth {
 
   static Future<void> signup(String email, String password) async {
     const url =
-<<<<<<< HEAD
         "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${AuthAPI}";
-=======
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCqkIHLWZ6VCq3oWWhF7GtygOayr6_pCxs";
->>>>>>> 9b8e5d979ea3a90fa8a8d11d67426411fb0c1a85
     final response = await http.post(url,
         body: json.encode(
           {
