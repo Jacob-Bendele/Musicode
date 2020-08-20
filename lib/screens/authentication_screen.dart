@@ -27,8 +27,14 @@ class _AuthScreenState extends State<AuthScreen> {
     showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-              title: Text("An Error Occured!"),
-              content: Text(message),
+              title: Text(
+                "Whoops!",
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                message,
+                textAlign: TextAlign.center,
+              ),
               actions: <Widget>[
                 FlatButton(
                   child: Text("Okay"),
@@ -37,6 +43,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   },
                 ),
               ],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32.0),
+              ),
             ));
   }
 
@@ -58,6 +67,8 @@ class _AuthScreenState extends State<AuthScreen> {
       print("Invalid Email");
       _authData["email"] = "";
       print(_authData["email"]);
+      const errorMessage = "This is not a valid email address.";
+      _showErrorDialog(errorMessage);
       return false;
     }
     _authData["email"] = email;
@@ -67,23 +78,28 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   bool _passwordValidator(String password, [String confirmPassword]) {
-    if (confirmPassword == null) {
+    if ((_authMode == AuthMode.Login) &&
+        (password.isEmpty || password.length < 6)) {
+      print("The password is to short! to login $_authMode");
+      const errorMessage = "Invalid password.";
+      _showErrorDialog(errorMessage);
+
+      return false;
+    } else if (confirmPassword != null && confirmPassword.isNotEmpty) {
       if (password.isEmpty || password.length < 6) {
         print("The password is to short!");
-        return false;
-      }
-
-      _authData["password"] = password;
-      return true;
-    } else if (confirmPassword != null && confirmPassword.isNotEmpty) {
-      if (password.isEmpty || password.length < 5) {
-        print("The password is to short!");
+        const errorMessage =
+            "This password is too short. Please use at least 6 characters.";
+        _showErrorDialog(errorMessage);
         return false;
       } else if (password != confirmPassword) {
         print("Passwords do not match!");
+        const errorMessage = "The passwords do not match.";
+        _showErrorDialog(errorMessage);
         return false;
       }
     }
+
     _authData["password"] = password;
     return true;
   }
@@ -118,7 +134,6 @@ class _AuthScreenState extends State<AuthScreen> {
       } else if (error.toString().contains('INVALID_PASSWORD')) {
         errorMessage = 'Invalid password.';
       }
-      print("do we even make it this far");
       _showErrorDialog(errorMessage);
     } catch (error) {
       const errorMessage =
@@ -138,7 +153,7 @@ class _AuthScreenState extends State<AuthScreen> {
           gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [Colors.blue, Colors.red])),
+              colors: [Color(0xff318fb5), Color(0xff005086)])),
       child: Scaffold(
           backgroundColor: Colors.transparent,
           body: Center(
@@ -162,7 +177,9 @@ class _AuthScreenState extends State<AuthScreen> {
                           Text(
                             "Musicode",
                             style: TextStyle(
-                                fontFamily: "OleoScript", fontSize: 50),
+                                fontFamily: "OleoScript",
+                                fontSize: 50,
+                                color: Color(0xff005086)),
                           ),
                           SizedBox(height: 20),
                           // Email Input Field

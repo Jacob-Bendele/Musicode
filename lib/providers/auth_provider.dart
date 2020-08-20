@@ -89,7 +89,7 @@ class Auth with ChangeNotifier {
   }
 
   bool get isAuth {
-    return _token != null;
+    return token != null;
   }
 
   String get token {
