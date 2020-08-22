@@ -26,6 +26,7 @@ dependencies:
   http: ^0.12.2
   provider: ^3.0.0
   flutter_barcode_scanner: ^1.0.1
+
   
   
 

@@ -1,4 +1,4 @@
-import 'package:Musicode/screens/history_screen.dart';
+import 'package:Musicode/screens/albums_overview_screen.dart';
 import 'package:Musicode/screens/authentication_screen.dart';
 import 'package:Musicode/screens/camera_screen.dart';
 import 'package:Musicode/screens/album_screen.dart';
@@ -37,15 +37,14 @@ class MyApp extends StatelessWidget {
             ),
             // we want to change this upon the user already being logged in
             //
-            home: auth.isAuth ? HistoryScreen() : AuthScreen(),
-            // home: HistoryScreen(),
+            // home: auth.isAuth ? AlbumsOverview() : AuthScreen(),
+            home: AlbumsOverview(),
 
             // These are named routes and we can pass them parameters when we call them with tha navigator. Their is an arguments section.
             routes: {
               '/login': (ctx) => AuthScreen(),
-              '/camera': (ctx) => CameraScreen(),
               '/album': (ctx) => AlbumScreen(),
-              '/favorites': (ctx) => HistoryScreen()
+              '/favorites': (ctx) => AlbumsOverview()
             }),
       ),
     );

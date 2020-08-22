@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:Musicode/models/Album.dart';
+import 'package:Musicode/models/http_exception.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Albums with ChangeNotifier {
+  String authToken;
+  String userId;
+  String spotifyAuthToken =
+      "BQCaLVD0dyGDaQQl1xq52G1TSYpSrdqF57rY_Vy1cK4D4CdIhPZusZxK19UN3bA1SUdvfiDReeRgplfZZ3k";
+
   List<Album> _albums = [
     Album(
       upc: '',
@@ -84,9 +92,46 @@ class Albums with ChangeNotifier {
 
   List<Album> get albums {
     return [..._albums];
+  }
 
-    void addAlbum() {
-      notifyListeners();
+  void fetchAlbums() {}
+
+  Future<void> searchUpc(String upc) async {
+    final url = "https://itunes.apple.com/lookup?upc=${upc}";
+
+    try {
+      final response = await http.get(
+        url,
+      );
+      print(json.decode(response.body));
+    } catch (error) {
+      print(error);
     }
   }
+
+  // Future<void> addAlbum(String upc) async {
+  //   final url =
+  //       'https://flutter-update.firebaseio.com/albums.json?auth=$authToken';
+  //   try {
+  //     final response = await http.post(
+  //       url,
+  //       body: json.encode({
+  //         'title': product.title,
+  //         'description': product.description,
+  //         'imageUrl': product.imageUrl,
+  //         'price': product.price,
+  //         'creatorId': userId,
+  //       }),
+  //     );
+  //     final newAlbum = Album(upc: '', title: '', artist: "", imageUrl: "");
+  //     _albums.add(newAlbum);
+  //     // _items.insert(0, newProduct); // at the start of the list
+  //     notifyListeners();
+  //   } catch (error) {
+  //     print(error);
+  //     throw error;
+  //   }
+  // }
+
+  void deleteAlbum() {}
 }

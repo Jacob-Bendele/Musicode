@@ -44,11 +44,12 @@ class Auth with ChangeNotifier {
   String _token;
   DateTime _expiryDate;
   String _userId;
+  static const String apiKey = "";
 
   Future<void> _authenticate(
       String email, String password, String urlSegment) async {
     final url =
-        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/$urlSegment?key=';
+        'https://www.googleapis.com/identitytoolkit/v3/relyingparty/$urlSegment?key=${apiKey}';
     try {
       final response = await http.post(
         url,
@@ -90,6 +91,10 @@ class Auth with ChangeNotifier {
 
   bool get isAuth {
     return token != null;
+  }
+
+  String get userId {
+    return _userId;
   }
 
   String get token {
