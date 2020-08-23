@@ -1,6 +1,6 @@
 import 'package:Musicode/screens/albums_overview_screen.dart';
 import 'package:Musicode/screens/authentication_screen.dart';
-import 'package:Musicode/screens/camera_screen.dart';
+import 'package:Musicode/screens/splash_screen.dart';
 import 'package:Musicode/screens/album_screen.dart';
 import 'package:Musicode/providers/auth_provider.dart';
 import 'package:Musicode/providers/album_provider.dart';
@@ -20,8 +20,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(
           value: Auth(),
         ),
-        ChangeNotifierProvider.value(
-          value: Albums(),
+        ChangeNotifierProxyProvider<Auth, Albums>(
+          update: (context, auth, prevAlbums) => Albums(auth.token, auth.userId,
+              prevAlbums == null ? [] : prevAlbums.albums),
         ),
       ],
       // When auth provider uses notify change method this consumer acts hihgly
@@ -37,14 +38,24 @@ class MyApp extends StatelessWidget {
             ),
             // we want to change this upon the user already being logged in
             //
-            // home: auth.isAuth ? AlbumsOverview() : AuthScreen(),
-            home: AlbumsOverview(),
+            home: auth.isAuth
+                ? AlbumsOverview()
+                : FutureBuilder(
+                    future: auth.tryAutoLogin(),
+                    builder: (ctx, authResultSnapshot) =>
+                        authResultSnapshot.connectionState ==
+                                ConnectionState.waiting
+                            ? SplashScreen()
+                            : AuthScreen(),
+                  ),
+            // home: AlbumsOverview(),
 
             // These are named routes and we can pass them parameters when we call them with tha navigator. Their is an arguments section.
             routes: {
               '/login': (ctx) => AuthScreen(),
               '/album': (ctx) => AlbumScreen(),
-              '/favorites': (ctx) => AlbumsOverview()
+              '/favorites': (ctx) => AlbumsOverview(),
+              '/splash': (ctx) => SplashScreen()
             }),
       ),
     );

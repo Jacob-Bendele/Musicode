@@ -1,137 +1,140 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:Musicode/models/Album.dart';
 import 'package:Musicode/models/http_exception.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:Musicode/providers/spotify_provider.dart';
 
 class Albums with ChangeNotifier {
-  String authToken;
-  String userId;
-  String spotifyAuthToken =
-      "BQCaLVD0dyGDaQQl1xq52G1TSYpSrdqF57rY_Vy1cK4D4CdIhPZusZxK19UN3bA1SUdvfiDReeRgplfZZ3k";
+  String _authToken;
+  String _userId;
+  List<Album> _albums = [];
 
-  List<Album> _albums = [
-    Album(
-      upc: '',
-      title: 'OK computer',
-      artist: 'radiohead',
-      imageUrl:
-          'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-    ),
-    Album(
-      upc: '',
-      title: 'In Raingbows',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-    Album(
-      upc: '',
-      title: 'Kid A',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-    Album(
-      upc: '',
-      title: 'Kid A',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-    Album(
-      upc: '',
-      title: 'Kid A',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-    Album(
-      upc: '',
-      title: 'Kid A',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-    Album(
-      upc: '',
-      title: 'Kid A',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-    Album(
-      upc: '',
-      title: 'Kid A',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-    Album(
-      upc: '',
-      title: 'Kid A',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-    Album(
-      upc: '',
-      title: 'Kid A',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-    Album(
-      upc: '',
-      title: 'Kid A',
-      artist: 'radiohead',
-      imageUrl:
-          'https://i5.walmartimages.com/asr/cd193f07-fc44-4b60-8212-66bbd4b07817_1.c6a64e750652eb2ee68a72015d175c9f.jpeg?odnHeight=450&odnWidth=450&odnBg=ffffff',
-    ),
-  ];
+  Albums(this._authToken, this._userId, this._albums);
 
   List<Album> get albums {
     return [..._albums];
   }
 
-  void fetchAlbums() {}
+  void fetchAlbums() {
+    final url =
+        "https://musicode-226a2.firebaseio.com/albums.json?auth=${_authToken}&orderBy=creatorId&equalTo=${_userId}";
+  }
+
+  void processBarcode(upc) async {
+    //search upc
+    // find on spotify return album
+    // find on apple music ??
+    // add album to db
+    // Notify to update UI
+  }
+
+  List<String> processSearchResponse(responseData) {
+    String title = responseData["items"][0]["title"];
+    List<String> list;
+    if (title.contains("(") || title.contains(")")) {
+      final index = title.indexOf("(");
+      title = title.substring(0, index);
+    }
+
+    if (title.contains("[") || title.contains("]")) {
+      final index = title.indexOf("[");
+      title = title.substring(0, index);
+    }
+
+    if (title.contains("-")) {
+      list = title.split("-");
+      print(list);
+    }
+    return list;
+  }
 
   Future<void> searchUpc(String upc) async {
-    final url = "https://itunes.apple.com/lookup?upc=${upc}";
+    //final url = "https://itunes.apple.com/lookup?upc=${upc}";
+
+    final url = "https://api.upcitemdb.com/prod/trial/lookup?upc=${upc}";
 
     try {
-      final response = await http.get(
-        url,
-      );
-      print(json.decode(response.body));
+      final response = await http.get(url);
+
+      final responseData = json.decode(response.body);
+
+      if (responseData["code"] != null) {
+        throw HttpException(responseData["message"]);
+      }
+
+      print(responseData);
+      // } else if (extractedData["resultCount"] == 0) {
+      //   final error = "Could not find UPC.";
+      //   throw error;
+      // }
+
+      // final newAlbum = Album(
+      //     upc: upc,
+      //     title: extractedData["results"][0]["collectionName"],
+      //     artist: extractedData["results"][0]["artistName"],
+      //     imageUrl: extractedData["results"][0]["artworkUrl100"],
+      //     id: '',
+      //     spotifyUri: '',
+      //     appleUri: '');
+
+      List<String> list = processSearchResponse(responseData);
+
+      Spotify spot = new Spotify();
+      await spot.authenitcate();
+      spot.search(list[1]);
+      // final newAlbum = Album(
+      //     upc: upc,
+      //     title: extractedData["results"][0]["collectionName"],
+      //     artist: extractedData["results"][0]["artistName"],
+      //     imageUrl: extractedData["results"][0]["artworkUrl100"],
+      //     id: '',
+      //     spotifyUri: '',
+      //     appleUri: '');
+      // //searchSpotify(newAlbum)
+      // //searchApple(newAlbumn)
+      // addAlbum(newAlbum);
+      //TODO: extract data send to add album
+      // error hadnling for no repsonse
+      // pust error dialog into models folder
+
     } catch (error) {
-      print(error);
+      throw error;
     }
   }
 
-  // Future<void> addAlbum(String upc) async {
-  //   final url =
-  //       'https://flutter-update.firebaseio.com/albums.json?auth=$authToken';
-  //   try {
-  //     final response = await http.post(
-  //       url,
-  //       body: json.encode({
-  //         'title': product.title,
-  //         'description': product.description,
-  //         'imageUrl': product.imageUrl,
-  //         'price': product.price,
-  //         'creatorId': userId,
-  //       }),
-  //     );
-  //     final newAlbum = Album(upc: '', title: '', artist: "", imageUrl: "");
-  //     _albums.add(newAlbum);
-  //     // _items.insert(0, newProduct); // at the start of the list
-  //     notifyListeners();
-  //   } catch (error) {
-  //     print(error);
-  //     throw error;
-  //   }
-  // }
+  Future<void> addAlbum(Album album) async {
+    final url =
+        'https://musicode-226a2.firebaseio.com/albums.json?auth=$_authToken';
+    try {
+      final response = await http.post(
+        url,
+        body: json.encode({
+          'upc': album.upc,
+          'title': album.title,
+          'artist': album.artist,
+          'imageUrl': album.imageUrl,
+          'creatorId': _userId,
+        }),
+      );
+
+      final newAlbum = Album(
+          upc: album.upc,
+          title: album.title,
+          artist: album.artist,
+          imageUrl: album.imageUrl,
+          id: json.decode(response.body)["name"]);
+
+      _albums.insert(0, newAlbum);
+
+      notifyListeners();
+    } catch (error) {
+      print(error);
+      throw error;
+    }
+  }
 
   void deleteAlbum() {}
 }

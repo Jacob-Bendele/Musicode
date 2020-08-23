@@ -5,13 +5,18 @@ class Album {
   final String title;
   final String artist;
   final String imageUrl;
+  final String id;
+  final String spotifyUri;
+  final String appleUri;
 
-  Album({
-    @required this.upc,
-    @required this.title,
-    @required this.artist,
-    @required this.imageUrl,
-  });
+  Album(
+      {@required this.upc,
+      @required this.title,
+      @required this.artist,
+      @required this.imageUrl,
+      @required this.id,
+      @required this.spotifyUri,
+      @required this.appleUri});
 
 //   static void addAlbum() {
 //     const url = "https://musicode-226a2.firebaseio.com/albums.json";

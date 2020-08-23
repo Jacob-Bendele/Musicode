@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Musicode/providers/auth_provider.dart';
 import 'package:Musicode/models/http_exception.dart';
+import 'package:Musicode/widgets/error_widget.dart';
 
 enum AuthMode { Login, Signup }
 
@@ -23,32 +24,6 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  void _showErrorDialog(String message) {
-    showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-              title: Text(
-                "Whoops!",
-                textAlign: TextAlign.center,
-              ),
-              content: Text(
-                message,
-                textAlign: TextAlign.center,
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text("Okay"),
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                  },
-                ),
-              ],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32.0),
-              ),
-            ));
-  }
-
   void _switchAuthMode() {
     if (_authMode == AuthMode.Login) {
       setState(() {
@@ -68,7 +43,7 @@ class _AuthScreenState extends State<AuthScreen> {
       _authData["email"] = "";
       print(_authData["email"]);
       const errorMessage = "This is not a valid email address.";
-      _showErrorDialog(errorMessage);
+      showErrorDialog(errorMessage, context);
       return false;
     }
     _authData["email"] = email;
@@ -82,7 +57,7 @@ class _AuthScreenState extends State<AuthScreen> {
         (password.isEmpty || password.length < 6)) {
       print("The password is to short! to login $_authMode");
       const errorMessage = "Invalid password.";
-      _showErrorDialog(errorMessage);
+      showErrorDialog(errorMessage, context);
 
       return false;
     } else if (confirmPassword != null && confirmPassword.isNotEmpty) {
@@ -90,12 +65,12 @@ class _AuthScreenState extends State<AuthScreen> {
         print("The password is to short!");
         const errorMessage =
             "This password is too short. Please use at least 6 characters.";
-        _showErrorDialog(errorMessage);
+        showErrorDialog(errorMessage, context);
         return false;
       } else if (password != confirmPassword) {
         print("Passwords do not match!");
         const errorMessage = "The passwords do not match.";
-        _showErrorDialog(errorMessage);
+        showErrorDialog(errorMessage, context);
         return false;
       }
     }
@@ -134,11 +109,11 @@ class _AuthScreenState extends State<AuthScreen> {
       } else if (error.toString().contains('INVALID_PASSWORD')) {
         errorMessage = 'Invalid password.';
       }
-      _showErrorDialog(errorMessage);
+      showErrorDialog(errorMessage, context);
     } catch (error) {
       const errorMessage =
           'Could not authenticate you. Please try again later.';
-      _showErrorDialog(errorMessage);
+      showErrorDialog(errorMessage, context);
     }
     setState(() {
       _isLoading = false;

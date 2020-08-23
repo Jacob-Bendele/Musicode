@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:Musicode/providers/album_provider.dart';
 import 'package:Musicode/models/album.dart';
 import 'package:Musicode/screens/camera_screen.dart';
+import 'package:Musicode/providers/auth_provider.dart';
 
 class AlbumsOverview extends StatelessWidget {
   @override
@@ -10,8 +11,10 @@ class AlbumsOverview extends StatelessWidget {
     void barcodeScanner() async {
       final scanner = new CameraScreen();
       await scanner.scanBarcodeNormal();
-      Provider.of<Albums>(context, listen: false).searchUpc(scanner.barcode);
-      print(scanner.barcode);
+      if (scanner.barcode != null || scanner.barcode != "") {
+        Provider.of<Albums>(context, listen: false).searchUpc(scanner.barcode);
+        print(scanner.barcode);
+      }
     }
 
     return Scaffold(
@@ -21,6 +24,7 @@ class AlbumsOverview extends StatelessWidget {
           child: Drawer(
             child: ListView(padding: EdgeInsets.zero, children: <Widget>[
               DrawerHeader(
+                // remove an put in separate widget
                 child: Center(
                     child: Text(
                   "Hello!",
@@ -29,7 +33,14 @@ class AlbumsOverview extends StatelessWidget {
                   color: Colors.lightBlue,
                 ),
               ),
-              ListTile(title: Text("Logout"), onTap: () {}),
+              ListTile(
+                  leading: Icon(Icons.exit_to_app),
+                  title: Text("Logout"),
+                  onTap: () {
+                    Navigator.of(context).pop(); // closes drawer
+                    Provider.of<Auth>(context, listen: false).logout();
+                  }),
+              Divider(),
             ]),
           ),
         ),
@@ -66,12 +77,6 @@ class _EntriesState extends State<Entries> {
         itemCount: albums.length,
         separatorBuilder: (context, i) => Divider(),
         itemBuilder: (context, i) {
-          final album = Album(
-            upc: albums[i].upc,
-            title: albums[i].title,
-            artist: albums[i].artist,
-            imageUrl: albums[i].imageUrl,
-          );
           return Container(
               height: MediaQuery.of(context).size.height * 0.2,
               child: Row(
@@ -80,8 +85,8 @@ class _EntriesState extends State<Entries> {
                     padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                     child: ConstrainedBox(
                         constraints: BoxConstraints(
-                            minHeight: 75,
-                            minWidth: 75,
+                            minHeight: 100,
+                            minWidth: 100,
                             maxHeight: 150,
                             maxWidth: 150),
                         child: Image(image: NetworkImage(albums[i].imageUrl))),
