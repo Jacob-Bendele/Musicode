@@ -2,8 +2,10 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:Musicode/providers/spotify_provider.dart';
 import 'package:Musicode/models/http_exception.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 import 'dart:async';
 
@@ -48,7 +50,8 @@ class Auth with ChangeNotifier {
   DateTime _expiryDate;
   String _userId;
   Timer _authTimer;
-  static const String apiKey = "";
+  final Spotify spotify = Spotify();
+  static const String apiKey = "AIzaSyCqkIHLWZ6VCq3oWWhF7GtygOayr6_pCxs";
 
   Future<void> _authenticate(
       String email, String password, String urlSegment) async {
@@ -80,12 +83,16 @@ class Auth with ChangeNotifier {
         ),
       );
       _autoLogout();
+
+      await spotify.authenitcate();
+
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       final userData = json.encode({
         "token": _token,
         "userId": _userId,
         "expiryDate": _expiryDate.toIso8601String(),
+        "spotifyToken": spotify.token
       });
       prefs.setString("userData", userData);
       print(json.decode(userData));
@@ -117,6 +124,7 @@ class Auth with ChangeNotifier {
     _token = extractedUserData['token'];
     _userId = extractedUserData['userId'];
     _expiryDate = expiryDate;
+    spotify.token = extractedUserData["spotifyToken"];
     notifyListeners();
     _autoLogout();
     return true;

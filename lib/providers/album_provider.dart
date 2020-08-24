@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:Musicode/models/Album.dart';
+import 'package:Musicode/models/album.dart';
 import 'package:Musicode/models/http_exception.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -10,30 +10,53 @@ import 'package:Musicode/providers/spotify_provider.dart';
 class Albums with ChangeNotifier {
   String _authToken;
   String _userId;
-  List<Album> _albums = [];
+  List<Album> _albums;
+  Spotify spotify;
 
-  Albums(this._authToken, this._userId, this._albums);
+  Albums(this._authToken, this._userId, this._albums, this.spotify);
 
   List<Album> get albums {
     return [..._albums];
   }
 
-  void fetchAlbums() {
+  Future<void> fetchAlbums() async {
     final url =
-        "https://musicode-226a2.firebaseio.com/albums.json?auth=${_authToken}&orderBy=creatorId&equalTo=${_userId}";
+        'https://musicode-226a2.firebaseio.com/albums.json?auth=${_authToken}&orderBy="creatorId"&equalTo="${_userId}"';
+
+    try {
+      final response = await http.get(url);
+      final responseData = json.decode(response.body);
+      final extractedData = json.decode(response.body) as Map<String, dynamic>;
+      if (responseData["error"] != null)
+        throw HttpException(responseData["error"]);
+
+      extractedData.forEach((albumId, albumData) {
+        _albums.add(Album(
+            id: albumId,
+            upc: albumData["upc"],
+            title: albumData["title"],
+            artist: albumData["artist"],
+            imageUrl: albumData["imageUrl"],
+            spotifyUri: albumData["spotifyUri"],
+            appleUri: albumData["appleUri"]));
+      });
+
+      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
   }
 
-  void processBarcode(upc) async {
-    //search upc
-    // find on spotify return album
-    // find on apple music ??
-    // add album to db
-    // Notify to update UI
+  void processBarcode(String upc) async {
+    String albumTitle = await searchUpc(upc);
+    final Album returnedAlbum = await spotify.search(albumTitle, upc);
+    addAlbum(returnedAlbum);
   }
 
-  List<String> processSearchResponse(responseData) {
+  String processSearchResponse(responseData) {
     String title = responseData["items"][0]["title"];
     List<String> list;
+
     if (title.contains("(") || title.contains(")")) {
       final index = title.indexOf("(");
       title = title.substring(0, index);
@@ -46,60 +69,25 @@ class Albums with ChangeNotifier {
 
     if (title.contains("-")) {
       list = title.split("-");
-      print(list);
+      title = list[1];
     }
-    return list;
+    return title;
   }
 
-  Future<void> searchUpc(String upc) async {
-    //final url = "https://itunes.apple.com/lookup?upc=${upc}";
-
+  Future<String> searchUpc(String upc) async {
     final url = "https://api.upcitemdb.com/prod/trial/lookup?upc=${upc}";
 
     try {
       final response = await http.get(url);
-
       final responseData = json.decode(response.body);
-
-      if (responseData["code"] != null) {
+      if (responseData["message"] != null) {
         throw HttpException(responseData["message"]);
       }
-
       print(responseData);
-      // } else if (extractedData["resultCount"] == 0) {
-      //   final error = "Could not find UPC.";
-      //   throw error;
-      // }
 
-      // final newAlbum = Album(
-      //     upc: upc,
-      //     title: extractedData["results"][0]["collectionName"],
-      //     artist: extractedData["results"][0]["artistName"],
-      //     imageUrl: extractedData["results"][0]["artworkUrl100"],
-      //     id: '',
-      //     spotifyUri: '',
-      //     appleUri: '');
-
-      List<String> list = processSearchResponse(responseData);
-
-      Spotify spot = new Spotify();
-      await spot.authenitcate();
-      spot.search(list[1]);
-      // final newAlbum = Album(
-      //     upc: upc,
-      //     title: extractedData["results"][0]["collectionName"],
-      //     artist: extractedData["results"][0]["artistName"],
-      //     imageUrl: extractedData["results"][0]["artworkUrl100"],
-      //     id: '',
-      //     spotifyUri: '',
-      //     appleUri: '');
-      // //searchSpotify(newAlbum)
-      // //searchApple(newAlbumn)
-      // addAlbum(newAlbum);
-      //TODO: extract data send to add album
-      // error hadnling for no repsonse
-      // pust error dialog into models folder
-
+      String albumTitle = processSearchResponse(responseData);
+      print(albumTitle);
+      return albumTitle;
     } catch (error) {
       throw error;
     }
@@ -116,6 +104,8 @@ class Albums with ChangeNotifier {
           'title': album.title,
           'artist': album.artist,
           'imageUrl': album.imageUrl,
+          'spotifyUri': album.spotifyUri,
+          'appleUri': album.appleUri,
           'creatorId': _userId,
         }),
       );
@@ -125,6 +115,8 @@ class Albums with ChangeNotifier {
           title: album.title,
           artist: album.artist,
           imageUrl: album.imageUrl,
+          spotifyUri: album.spotifyUri,
+          appleUri: album.appleUri,
           id: json.decode(response.body)["name"]);
 
       _albums.insert(0, newAlbum);
@@ -136,5 +128,25 @@ class Albums with ChangeNotifier {
     }
   }
 
-  void deleteAlbum() {}
+  Future<void> deleteAlbum(String id) async {
+    final url =
+        'https://musicode-226a2.firebaseio.com/albums/$id.json?auth=${_authToken}';
+
+    final existingAlbumIndex = _albums.indexWhere((album) => album.id == id);
+    var existingAlbum = _albums[existingAlbumIndex];
+    _albums.removeAt(existingAlbumIndex);
+    notifyListeners();
+    try {
+      final response = await http.delete(url);
+      if (response.statusCode >= 400) {
+        _albums.insert(existingAlbumIndex, existingAlbum);
+        notifyListeners();
+        throw HttpException('Could not delete product.');
+      }
+
+      existingAlbum = null;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:Musicode/providers/auth_provider.dart';
+import 'package:Musicode/providers/spotify_provider.dart';
 import 'package:Musicode/models/http_exception.dart';
 import 'package:Musicode/widgets/error_widget.dart';
 

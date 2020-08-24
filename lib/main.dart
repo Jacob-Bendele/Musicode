@@ -4,6 +4,7 @@ import 'package:Musicode/screens/splash_screen.dart';
 import 'package:Musicode/screens/album_screen.dart';
 import 'package:Musicode/providers/auth_provider.dart';
 import 'package:Musicode/providers/album_provider.dart';
+import 'package:Musicode/providers/spotify_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProxyProvider<Auth, Albums>(
           update: (context, auth, prevAlbums) => Albums(auth.token, auth.userId,
-              prevAlbums == null ? [] : prevAlbums.albums),
+              prevAlbums == null ? [] : prevAlbums.albums, auth.spotify),
         ),
       ],
       // When auth provider uses notify change method this consumer acts hihgly
