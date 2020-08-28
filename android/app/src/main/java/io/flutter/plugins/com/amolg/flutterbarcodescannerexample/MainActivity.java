@@ -1,4 +1,4 @@
-package com.amolg.flutterbarcodescannerexample;
+package com.bendele.Musicode;
 
 import io.flutter.embedding.android.FlutterActivity;
 

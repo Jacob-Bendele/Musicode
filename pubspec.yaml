@@ -30,7 +30,7 @@ dependencies:
   firebase_core: ^0.4.0+9
   firebase_auth: ^0.14.0+5
   url_launcher: ^5.5.0
-  flutter_automation: ^1.3.3
+
   
   
 
@@ -42,7 +42,15 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_automation: ^1.3.3
+  flutter_launcher_icons: ^0.7.5
 
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/appIcon.png"
+  adaptive_icon_background: "#FF2A628F"
+  adaptive_icon_foreground: "assets/images/appIcon.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

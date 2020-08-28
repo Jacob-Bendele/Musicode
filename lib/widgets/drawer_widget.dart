@@ -8,7 +8,7 @@ import 'package:Musicode/providers/album_provider.dart';
 class DrawerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Platform independent function for laucnhing URLs
+    // Platform independent method for laucnhing URLs
     Future<void> _launchUrl(url) async {
       if (await canLaunch(url)) {
         await launch(url);

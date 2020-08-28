@@ -157,7 +157,7 @@ class Albums with ChangeNotifier {
       if (response.statusCode >= 400) {
         _albums.insert(existingAlbumIndex, existingAlbum);
         notifyListeners();
-        throw HttpException('Could not delete album.');
+        throw HttpException("Could not delete album.");
       }
 
       existingAlbum = null;

@@ -18,7 +18,7 @@ class CameraScreen {
           "#ff6666", "Cancel", true, ScanMode.BARCODE);
       _scanBarcode = barcodeScanRes;
     } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
+      barcodeScanRes = "Failed to get platform version.";
     }
   }
 }
