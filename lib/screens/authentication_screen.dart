@@ -43,16 +43,12 @@ class _AuthScreenState extends State<AuthScreen> {
   // Validates email address
   bool _emailValidator(String email) {
     if (email.isEmpty || !email.contains('@')) {
-      print("Invalid Email");
       _authData["email"] = "";
-      print(_authData["email"]);
       const errorMessage = "This is not a valid email address.";
       dialog(errorMessage, "error", context);
       return false;
     }
     _authData["email"] = email;
-    print("Valid Email");
-    print(_authData["email"]);
     return true;
   }
 
@@ -60,19 +56,16 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _passwordValidator(String password, [String confirmPassword]) {
     if ((_authMode == AuthMode.Login) &&
         (password.isEmpty || password.length < 6)) {
-      print("The password is to short! to login $_authMode");
       const errorMessage = "Invalid password.";
       dialog(errorMessage, "error", context);
       return false;
     } else if (confirmPassword != null && confirmPassword.isNotEmpty) {
       if (password.isEmpty || password.length < 6) {
-        print("The password is to short!");
         const errorMessage =
             "This password is too short. Please use at least 6 characters.";
         dialog(errorMessage, "error", context);
         return false;
       } else if (password != confirmPassword) {
-        print("Passwords do not match!");
         const errorMessage = "The passwords do not match.";
         dialog(errorMessage, "error", context);
         return false;

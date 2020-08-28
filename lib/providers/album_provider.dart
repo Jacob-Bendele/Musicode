@@ -97,10 +97,8 @@ class Albums with ChangeNotifier {
       if (responseData["message"] != null) {
         throw HttpException(responseData["message"]);
       }
-      print(responseData);
 
       String albumTitle = processSearchResponse(responseData);
-      print(albumTitle);
       return albumTitle;
     } catch (error) {
       throw error;
@@ -138,7 +136,6 @@ class Albums with ChangeNotifier {
 
       notifyListeners();
     } catch (error) {
-      print(error);
       throw error;
     }
   }

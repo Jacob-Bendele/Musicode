@@ -16,7 +16,7 @@ class Auth with ChangeNotifier {
   Timer _authTimer;
   final Spotify spotify = Spotify();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  static const String apiKey = "";
+  static const String apiKey = "AIzaSyCqkIHLWZ6VCq3oWWhF7GtygOayr6_pCxs";
 
   // Getters for authorization token
   bool get isAuth {
@@ -83,7 +83,6 @@ class Auth with ChangeNotifier {
         "spotifyToken": spotify.token
       });
       prefs.setString("userData", userData);
-      print(json.decode(userData));
     } catch (error) {
       throw error;
     }

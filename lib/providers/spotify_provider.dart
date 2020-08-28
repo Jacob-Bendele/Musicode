@@ -8,7 +8,8 @@ import 'package:Musicode/models/album.dart';
 class Spotify with ChangeNotifier {
   String _token;
   DateTime _expiryDate;
-  static const String secret = "";
+  static const String secret =
+      "7af89624f3f84410a844e97138426bb5:5ce133421b494c1eb1723574a2b19796";
 
   set token(String spotifyToken) {
     _token = spotifyToken;
