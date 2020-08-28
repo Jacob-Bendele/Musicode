@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:Musicode/providers/auth_provider.dart';
-import 'package:Musicode/providers/spotify_provider.dart';
 import 'package:Musicode/models/http_exception.dart';
-import 'package:Musicode/widgets/error_widget.dart';
+import 'package:Musicode/widgets/dialog_widget.dart';
 
 enum AuthMode { Login, Signup }
 
@@ -21,10 +21,12 @@ class _AuthScreenState extends State<AuthScreen> {
     'password': '',
   };
 
+  // Text controller to handle the input text fields
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  // Switches between login and signup to affect the auth widget
   void _switchAuthMode() {
     if (_authMode == AuthMode.Login) {
       setState(() {
@@ -38,13 +40,14 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  // Validates email address
   bool _emailValidator(String email) {
     if (email.isEmpty || !email.contains('@')) {
       print("Invalid Email");
       _authData["email"] = "";
       print(_authData["email"]);
       const errorMessage = "This is not a valid email address.";
-      showErrorDialog(errorMessage, context);
+      dialog(errorMessage, "error", context);
       return false;
     }
     _authData["email"] = email;
@@ -53,25 +56,25 @@ class _AuthScreenState extends State<AuthScreen> {
     return true;
   }
 
+  // Password validator checks for length and matching
   bool _passwordValidator(String password, [String confirmPassword]) {
     if ((_authMode == AuthMode.Login) &&
         (password.isEmpty || password.length < 6)) {
       print("The password is to short! to login $_authMode");
       const errorMessage = "Invalid password.";
-      showErrorDialog(errorMessage, context);
-
+      dialog(errorMessage, "error", context);
       return false;
     } else if (confirmPassword != null && confirmPassword.isNotEmpty) {
       if (password.isEmpty || password.length < 6) {
         print("The password is to short!");
         const errorMessage =
             "This password is too short. Please use at least 6 characters.";
-        showErrorDialog(errorMessage, context);
+        dialog(errorMessage, "error", context);
         return false;
       } else if (password != confirmPassword) {
         print("Passwords do not match!");
         const errorMessage = "The passwords do not match.";
-        showErrorDialog(errorMessage, context);
+        dialog(errorMessage, "error", context);
         return false;
       }
     }
@@ -80,6 +83,23 @@ class _AuthScreenState extends State<AuthScreen> {
     return true;
   }
 
+  // Reset password via the Firebase authentication
+  Future<void> resetPassword() async {
+    bool email = _emailValidator(_emailController.text);
+    try {
+      if (email) {
+        await Provider.of<Auth>(context, listen: false)
+            .resetPassword(_emailController.text);
+        dialog("Password reset email sent!", "notice", context);
+      } else {
+        throw ("Please enter an email before resetting password.");
+      }
+    } catch (error) {
+      dialog(error, "error", context);
+    }
+  }
+
+  // Submit the text filds for login or signup
   Future<void> _submit() async {
     bool pass = _passwordValidator(
         _passwordController.text, _confirmPasswordController.text);
@@ -90,6 +110,7 @@ class _AuthScreenState extends State<AuthScreen> {
       _isLoading = true;
     });
     try {
+      // Validate pass and email before trying login or signup
       if (pass && email) {
         (_authMode == AuthMode.Login)
             ? await Provider.of<Auth>(context, listen: false)
@@ -97,6 +118,8 @@ class _AuthScreenState extends State<AuthScreen> {
             : await Provider.of<Auth>(context, listen: false)
                 .signup(_authData["email"], _authData["password"]);
       }
+      // Handles diagnostics TODO: make a separate diagnostic handler outside
+      // of the screens
     } on HttpException catch (error) {
       var errorMessage = 'Authentication failed';
       if (error.toString().contains('EMAIL_EXISTS')) {
@@ -110,11 +133,11 @@ class _AuthScreenState extends State<AuthScreen> {
       } else if (error.toString().contains('INVALID_PASSWORD')) {
         errorMessage = 'Invalid password.';
       }
-      showErrorDialog(errorMessage, context);
+      dialog(errorMessage, "error", context);
     } catch (error) {
       const errorMessage =
           'Could not authenticate you. Please try again later.';
-      showErrorDialog(errorMessage, context);
+      dialog(errorMessage, "error", context);
     }
     setState(() {
       _isLoading = false;
@@ -129,12 +152,13 @@ class _AuthScreenState extends State<AuthScreen> {
           gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [Color(0xff318fb5), Color(0xff005086)])),
+              colors: [Color(0xff2A628F), Color(0xff3E92CC)])),
       child: Scaffold(
           backgroundColor: Colors.transparent,
           body: Center(
               // White box around entry area
               child: Container(
+                  // Logic for box height based on AuthMode
                   height: (_authMode == AuthMode.Login)
                       ? size.height * 0.55
                       : size.height * 0.60,
@@ -155,10 +179,10 @@ class _AuthScreenState extends State<AuthScreen> {
                             style: TextStyle(
                                 fontFamily: "OleoScript",
                                 fontSize: 50,
-                                color: Color(0xff005086)),
+                                color: Colors.black),
                           ),
                           SizedBox(height: 20),
-                          // Email Input Field
+                          // Email input field
                           TextField(
                             obscureText: false,
                             keyboardType: TextInputType.emailAddress,
@@ -174,9 +198,9 @@ class _AuthScreenState extends State<AuthScreen> {
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(32.0))),
                           ),
-                          // Adds a blank box as space, more readable generally than padding.
+                          // Adds a blank box as space, more readable generally than padding
                           SizedBox(height: 10),
-                          // Password Field
+                          // Password input field
                           TextField(
                             obscureText: true,
                             controller: _passwordController,
@@ -192,7 +216,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     borderRadius: BorderRadius.circular(32.0))),
                           ),
                           SizedBox(height: 10),
-                          // Confirm Password Field
+                          // Confirm password field
                           if (_authMode == AuthMode.Signup)
                             TextField(
                               obscureText: true,
@@ -211,10 +235,11 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                           if (_authMode == AuthMode.Signup)
                             SizedBox(height: 10),
-                          // Login and Signup Button
+                          // Login and Signup button
                           if (_isLoading)
                             CircularProgressIndicator()
                           else
+                            // Submit the form for login or signup
                             Container(
                                 width: double.infinity,
                                 child: RaisedButton(
@@ -239,7 +264,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
-                              // Signup Login Button
+                              // Swith AuthModes between login and signup
                               Container(
                                   child: FlatButton(
                                 shape: RoundedRectangleBorder(
@@ -255,13 +280,15 @@ class _AuthScreenState extends State<AuthScreen> {
                                     ? "Sign Up"
                                     : "Login"),
                               )),
-                              // Forgot Password Button
+                              // Forgot password button
                               Container(
                                   child: FlatButton(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18.0),
                                 ),
-                                onPressed: () {},
+                                onPressed: () {
+                                  resetPassword();
+                                },
                                 textColor: Colors.black,
                                 child: Text("Forgot Password?"),
                               )),

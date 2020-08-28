@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
 import 'package:Musicode/models/http_exception.dart';
 import 'package:Musicode/models/album.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Spotify with ChangeNotifier {
   String _token;
   DateTime _expiryDate;
-  static const String secret =
-      "7af89624f3f84410a844e97138426bb5:5ce133421b494c1eb1723574a2b19796";
+  static const String secret = "";
 
   set token(String spotifyToken) {
     _token = spotifyToken;
@@ -19,13 +18,14 @@ class Spotify with ChangeNotifier {
     return _token;
   }
 
+  // Handles the Spotify authentication token
   Future<void> authenitcate() async {
     final url = "https://accounts.spotify.com/api/token";
     try {
       final response = await http.post(
         url,
         headers: {
-          'Authorization': 'Basic ' + (base64Encode(utf8.encode("${secret}")))
+          'Authorization': 'Basic ' + (base64Encode(utf8.encode("$secret")))
         },
         body: {
           'grant_type': 'client_credentials',
@@ -42,30 +42,30 @@ class Spotify with ChangeNotifier {
           seconds: responseData['expires_in'],
         ),
       );
-      print("the spotifyh token is $_token");
       notifyListeners();
     } catch (error) {
       throw error;
     }
   }
 
+  // Searches Spotify for the album title handles the bearer token for Spotify
   Future<Album> search(String albumTitle, String upc) async {
     final url =
-        "https://api.spotify.com/v1/search?q=album:${albumTitle}&type=album";
+        "https://api.spotify.com/v1/search?q=album:$albumTitle&type=album";
     try {
       final response = await http.get(
         url,
         headers: {'Authorization': "Bearer $_token"},
       );
-      //check fo null idiot
+
       final responseData = json.decode(response.body);
-      print(responseData);
       if (responseData["error"] != null) {
         throw HttpException(responseData["error"]["message"]);
       } else if (responseData["albums"]["total"] == 0) {
         throw ("Album could not be found!");
       }
 
+      // Parses the returned Spotify JSON for the album
       final newAlbum = Album(
           upc: upc,
           title: responseData["albums"]["items"][0]["name"],

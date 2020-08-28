@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
-void showErrorDialog(String message, BuildContext context) {
+// A reusable dialog box that takes a message and string type
+// The message will be displayed and the type will determine dialog type
+void dialog(String message, String type, BuildContext context) {
   showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
             title: Text(
-              "Whoops!",
+              (type == "error") ? "Whoops!" : "Notice",
               textAlign: TextAlign.center,
             ),
             content: Text(

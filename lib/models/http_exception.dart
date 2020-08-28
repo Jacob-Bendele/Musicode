@@ -1,3 +1,4 @@
+// Custom exception for API calls returning HTTP errors
 class HttpException implements Exception {
   final String message;
 
@@ -6,6 +7,5 @@ class HttpException implements Exception {
   @override
   String toString() {
     return message;
-    // return super.toString(); // Instance of HttpException
   }
 }
