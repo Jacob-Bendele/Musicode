@@ -11,6 +11,6 @@ Musicode is for the thrift store and record shop music hunter. It is an applicat
 ![](https://github.com/Jacob-Bendele/Musicode/blob/master/assets/promo/album.gif)
 
 ## Download
-
+Pending Google Play and App Store review processes.
 
 
